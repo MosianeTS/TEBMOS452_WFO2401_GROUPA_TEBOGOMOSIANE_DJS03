@@ -3,6 +3,16 @@ import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
 let page = 1;
 let matches = books;
 
+/**
+ * Creates a preview button element for a book.
+ * @param {Object} book - The book object containing id, image, title, and author.
+ * @param {string} book.id - The unique identifier of the book.
+ * @param {string} book.image - The URL of the book's cover image.
+ * @param {string} book.title - The title of the book.
+ * @param {string} book.author - The author of the book.
+ * @returns {HTMLButtonElement} - The created preview button element.
+ */
+
 function createPreviewButton({ author, id, image, title }) {
     const element = document.createElement('button');
     element.classList = 'preview';
@@ -18,6 +28,15 @@ function createPreviewButton({ author, id, image, title }) {
     return element;
 }
 
+/**
+ * Appends a subset of books to a document fragment.
+ * @param {Object[]} books - Array of book objects.
+ * @param {DocumentFragment} fragment - The document fragment to which books will be appended.
+ * @param {number} [start=0] - The start index of books to append.
+ * @param {number} [end=BOOKS_PER_PAGE] - The end index of books to append.
+ * @returns {void}
+ */
+
 function appendBooksToFragment(books, fragment, start = 0, end = BOOKS_PER_PAGE) {
     for (const book of books.slice(start, end)) {
         const element = createPreviewButton(book);
@@ -25,11 +44,23 @@ function appendBooksToFragment(books, fragment, start = 0, end = BOOKS_PER_PAGE)
     }
 }
 
+
+/**
+ * Updates the book list with the current matches.
+ * @returns {void}
+ */
 function updateBookList() {
     const fragment = document.createDocumentFragment();
     appendBooksToFragment(matches, fragment);
     document.querySelector('[data-list-items]').appendChild(fragment);
 }
+
+/**
+ * Creates a document fragment containing dropdown options.
+ * @param {Object} data - The data object containing key-value pairs.
+ * @param {string} firstOptionText - The text for the first default option.
+ * @returns {DocumentFragment} - The created document fragment.
+ */
 
 function createDropdownOptions(data, firstOptionText) {
     const fragment = document.createDocumentFragment();
@@ -47,10 +78,20 @@ function createDropdownOptions(data, firstOptionText) {
     return fragment;
 }
 
+
+/**
+ * Initializes dropdown menus for genres and authors.
+ * @returns {void}
+ */
 function initializeDropdowns() {
     document.querySelector('[data-search-genres]').appendChild(createDropdownOptions(genres, 'All Genres'));
     document.querySelector('[data-search-authors]').appendChild(createDropdownOptions(authors, 'All Authors'));
 }
+
+/**
+ * Sets the theme based on user's preference or system settings.
+ * @returns {void}
+ */
 
 function setTheme() {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -64,15 +105,32 @@ function setTheme() {
     }
 }
 
+
+/**
+ * Updates the "Show More" button text and state based on remaining books.
+ * @returns {void}
+ */
 function updateShowMoreButton() {
     const remaining = matches.length - (page * BOOKS_PER_PAGE);
     document.querySelector('[data-list-button]').innerText = `Show more (${remaining})`;
     document.querySelector('[data-list-button]').disabled = remaining <= 0;
 }
 
+/**
+ * Closes an overlay element.
+ * @param {string} selector - The CSS selector for the overlay element.
+ * @returns {void}
+ */
 function closeOverlay(selector) {
     document.querySelector(selector).open = false;
 }
+
+/**
+ * Opens an overlay element and optionally focuses on a specified element within it.
+ * @param {string} selector - The CSS selector for the overlay element.
+ * @param {string} [focusSelector=null] - The CSS selector for the element to focus on.
+ * @returns {void}
+ */
 
 function openOverlay(selector, focusSelector = null) {
     document.querySelector(selector).open = true;
@@ -80,6 +138,7 @@ function openOverlay(selector, focusSelector = null) {
         document.querySelector(focusSelector).focus();
     }
 }
+
 
 function handleSettingsFormSubmit(event) {
     event.preventDefault();
@@ -97,6 +156,11 @@ function handleSettingsFormSubmit(event) {
     closeOverlay('[data-settings-overlay]');
 }
 
+/**
+ * Handles the submission of the search form, filters the books based on user input, and updates the book list.
+ * @param {Event} event - The form submission event.
+ * @returns {void}
+ */
 function handleSearchFormSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -118,6 +182,11 @@ function handleSearchFormSubmit(event) {
     closeOverlay('[data-search-overlay]');
 }
 
+
+/**
+ * Handles the click event for the "Show More" button, appends more books to the list, and updates the button state.
+ * @returns {void}
+ */
 function handleShowMoreButtonClick() {
     const fragment = document.createDocumentFragment();
     appendBooksToFragment(matches, fragment, page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE);
@@ -126,6 +195,12 @@ function handleShowMoreButtonClick() {
     updateShowMoreButton();
 }
 
+/**
+ * Handles the click event on preview elements.
+ * Updates the preview section with details of the selected book.
+ * @param {Event} event - The click event.
+ * @returns {void}
+ */
 function handlePreviewClick(event) {
     const pathArray = Array.from(event.path || event.composedPath());
     const previewElement = pathArray.find(node => node?.dataset?.preview);
@@ -142,6 +217,7 @@ function handlePreviewClick(event) {
         }
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const startingFragment = document.createDocumentFragment();
